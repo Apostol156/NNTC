@@ -252,11 +252,13 @@ def parse_web_page(html_text: str, base_url: str):
     """Fallback: разбор Default.aspx / usergroup_ldap.xml.asp (формат RDWeb)."""
     items = []
     # Публикации вида: <a href="/RDWeb/Pages/en-US/...Default.aspx?Alias=RemoteApplications%2fMyApp&Name=...&Type=Application...">
+    # NB: все группы параметров обёрнуты в группу href (...) — иначе regex
+    # не компилируется (несбалансированные скобки внутри именованной группы).
     pattern = re.compile(
-        r'<a[^>]+href="(?P<href>[^"]*?Alias=(?P<alias>[^&"<>]*)'
+        r'<a[^>]+href="(?P<href>(?:[^"]*?Alias=(?P<alias>[^&"<>]*)'
         r'(?:&(?:amp;)?Name=(?P<name>[^&"<>]*))?'
-        r'(?:&(?:amp;)?Type=(?P<type>[^&"<>]*))?'
-        r'[^"]*"[^>]*>(?P<label>.*?)</a>',
+        r'(?:&(?:amp;)?Type=(?P<type>[^&"<>]*))?[^"]*))"'
+        r'[^>]*>(?P<label>.*?)</a>',
         re.I | re.S,
     )
     seen = set()
